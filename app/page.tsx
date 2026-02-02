@@ -1,47 +1,45 @@
 import { MusicPlayer } from '@/components/MusicPlayer';
-import { getAllTracks } from '@/lib/data/tracks';
+import { getTrackByDomain } from '@/lib/data/tracks';
+import { headers } from 'next/headers';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-  title: 'Music Showcase - Nightcall by Reverie',
-  description: 'Listen to Nightcall by Reverie - A beautiful music showcase website built with Next.js',
-  keywords: ['music', 'showcase', 'nightcall', 'reverie', 'audio player'],
-  authors: [{ name: 'Music Showcase' }],
-  openGraph: {
-    title: 'Music Showcase - Nightcall by Reverie',
-    description: 'Listen to Nightcall by Reverie',
-    type: 'music.song',
-    images: [
-      {
-        url: 'https://oss.ashes.vip/Nightcall%20-%20Reverie.jpg',
-        width: 1200,
-        height: 1200,
-        alt: 'Nightcall by Reverie Album Cover',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Music Showcase - Nightcall by Reverie',
-    description: 'Listen to Nightcall by Reverie',
-    images: ['https://oss.ashes.vip/Nightcall%20-%20Reverie.jpg'],
-  },
-};
+// 动态生成元数据
+export async function generateMetadata(): Promise<Metadata> {
+  const headersList = headers();
+  const host = headersList.get('host') || '';
+  const track = getTrackByDomain(host);
+
+  return {
+    title: `Music Showcase - ${track.title} by ${track.artist}`,
+    description: `Listen to ${track.title} by ${track.artist} - A beautiful music showcase website built with Next.js`,
+    keywords: ['music', 'showcase', track.title.toLowerCase(), track.artist.toLowerCase(), 'audio player'],
+    authors: [{ name: 'Music Showcase' }],
+    openGraph: {
+      title: `Music Showcase - ${track.title} by ${track.artist}`,
+      description: `Listen to ${track.title} by ${track.artist}`,
+      type: 'music.song',
+      images: [
+        {
+          url: track.coverUrl,
+          width: 1200,
+          height: 1200,
+          alt: `${track.title} by ${track.artist} Album Cover`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `Music Showcase - ${track.title} by ${track.artist}`,
+      description: `Listen to ${track.title} by ${track.artist}`,
+      images: [track.coverUrl],
+    },
+  };
+}
 
 export default function Home() {
-  const tracks = getAllTracks();
-  const track = tracks[0]; // Get the Nightcall - Reverie track
-
-  if (!track) {
-    return (
-      <main className="flex min-h-screen items-center justify-center p-4">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">Music Showcase</h1>
-          <p className="text-text-secondary">No tracks available</p>
-        </div>
-      </main>
-    );
-  }
+  const headersList = headers();
+  const host = headersList.get('host') || '';
+  const track = getTrackByDomain(host);
 
   return (
     <>

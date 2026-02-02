@@ -14,4 +14,6 @@ export interface Track {
   coverUrl: string;
   /** 音频时长（秒），可选 */
   duration?: number;
+  /** 关联的域名，用于域名特定展示 */
+  domain?: string;
 }
