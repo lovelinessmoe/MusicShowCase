@@ -28,8 +28,15 @@ export const tracks: Track[] = [
  * @returns 匹配的曲目，如果没有匹配则返回默认曲目
  */
 export function getTrackByDomain(hostname: string): Track {
+  // 移除 www. 前缀进行标准化匹配
+  const normalizedHostname = hostname.replace(/^www\./, '');
+  
   // 查找匹配域名的曲目
-  const domainTrack = tracks.find(track => track.domain === hostname);
+  const domainTrack = tracks.find(track => {
+    if (track.domain === 'default') return false;
+    const normalizedTrackDomain = track.domain?.replace(/^www\./, '');
+    return normalizedTrackDomain === normalizedHostname;
+  });
   
   if (domainTrack) {
     return domainTrack;
