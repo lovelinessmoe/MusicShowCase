@@ -33,13 +33,20 @@ export function Lyrics({ lrcLyrics, currentTime }: LyricsProps) {
     if (currentLineRef.current && lyricsContainerRef.current) {
       const container = lyricsContainerRef.current;
       const currentLine = currentLineRef.current;
-      const containerHeight = container.clientHeight;
-      const lineTop = currentLine.offsetTop;
-      const lineHeight = currentLine.clientHeight;
       
-      container.scrollTo({
-        top: lineTop - containerHeight / 2 + lineHeight / 2,
-        behavior: 'smooth',
+      // 确保元素已经渲染
+      requestAnimationFrame(() => {
+        const containerHeight = container.clientHeight;
+        const lineTop = currentLine.offsetTop;
+        const lineHeight = currentLine.clientHeight;
+        
+        // 计算滚动位置，让当前行居中
+        const scrollTop = lineTop - containerHeight / 2 + lineHeight / 2;
+        
+        container.scrollTo({
+          top: scrollTop,
+          behavior: 'smooth',
+        });
       });
     }
   }, [currentIndex]);
@@ -49,9 +56,9 @@ export function Lyrics({ lrcLyrics, currentTime }: LyricsProps) {
   }
 
   return (
-    <div className="relative h-full">
+    <div className="relative w-full h-full">
       {/* 顶部渐变遮罩 */}
-      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/20 via-transparent to-transparent pointer-events-none z-10" />
+      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#0f0f0f] via-transparent to-transparent pointer-events-none z-10" />
       
       {/* 中心高亮区域 */}
       <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 h-32 bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none z-10 rounded-lg" />
@@ -59,7 +66,7 @@ export function Lyrics({ lrcLyrics, currentTime }: LyricsProps) {
       {/* 歌词滚动容器 */}
       <div 
         ref={lyricsContainerRef}
-        className="h-full overflow-y-auto px-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="w-full h-full overflow-y-auto px-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         <div className="py-40">
@@ -137,7 +144,7 @@ export function Lyrics({ lrcLyrics, currentTime }: LyricsProps) {
       </div>
       
       {/* 底部渐变遮罩 */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none z-10" />
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#0f0f0f] via-transparent to-transparent pointer-events-none z-10" />
     </div>
   );
 }

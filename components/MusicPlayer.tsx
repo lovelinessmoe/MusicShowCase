@@ -100,11 +100,11 @@ export function MusicPlayer({ track }: MusicPlayerProps) {
           </div>
 
           {/* 歌词显示区域 */}
-          <div className="w-full lg:flex-1 lg:min-w-[700px] lg:max-h-[650px] p-8 bg-gradient-to-br from-white/5 via-blue-500/5 to-purple-500/5 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/10 relative overflow-hidden">
-            {/* 背景装饰 */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 opacity-50" />
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+          <div className="w-full lg:flex-1 lg:min-w-[700px] lg:max-h-[650px] p-8 relative overflow-hidden">
+            {/* 背景渐变装饰 - 更柔和 */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/3 translate-x-1/3 animate-pulse-slow" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 animate-pulse-slow" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl" />
             
             {/* 歌词内容 */}
             <div className="relative z-10 h-full">
