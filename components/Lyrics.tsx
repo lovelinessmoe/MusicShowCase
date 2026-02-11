@@ -13,7 +13,7 @@ export function Lyrics({ lrcLyrics, currentTime }: LyricsProps) {
   const [lyrics, setLyrics] = useState<LyricLine[]>([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const lyricsContainerRef = useRef<HTMLDivElement>(null);
-  const currentLineRef = useRef<HTMLDivElement>(null);
+  const currentLineRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   useEffect(() => {
     if (lrcLyrics) {
@@ -30,26 +30,38 @@ export function Lyrics({ lrcLyrics, currentTime }: LyricsProps) {
   }, [currentTime, lyrics]);
 
   useEffect(() => {
-    if (currentLineRef.current && lyricsContainerRef.current) {
-      const container = lyricsContainerRef.current;
-      const currentLine = currentLineRef.current;
-      
-      // 确保元素已经渲染
-      requestAnimationFrame(() => {
+    const container = lyricsContainerRef.current;
+    const currentLine = currentLineRefs.current.get(currentIndex);
+    
+    if (container && currentLine && currentIndex >= 0) {
+      // 使用 setTimeout 确保 DOM 已更新
+      setTimeout(() => {
+        const containerRect = container.getBoundingClientRect();
+        const lineRect = currentLine.getBoundingClientRect();
+        
+        // 计算当前行相对于容器的位置
+        const lineRelativeTop = currentLine.offsetTop;
         const containerHeight = container.clientHeight;
-        const lineTop = currentLine.offsetTop;
         const lineHeight = currentLine.clientHeight;
         
         // 计算滚动位置，让当前行居中
-        const scrollTop = lineTop - containerHeight / 2 + lineHeight / 2;
+        const targetScrollTop = lineRelativeTop - (containerHeight / 2) + (lineHeight / 2);
         
         container.scrollTo({
-          top: scrollTop,
+          top: targetScrollTop,
           behavior: 'smooth',
         });
-      });
+      }, 50);
     }
   }, [currentIndex]);
+
+  const setLineRef = (index: number) => (el: HTMLDivElement | null) => {
+    if (el) {
+      currentLineRefs.current.set(index, el);
+    } else {
+      currentLineRefs.current.delete(index);
+    }
+  };
 
   if (!lrcLyrics || lyrics.length === 0) {
     return null;
@@ -97,7 +109,7 @@ export function Lyrics({ lrcLyrics, currentTime }: LyricsProps) {
             return (
               <div
                 key={index}
-                ref={isCurrent ? currentLineRef : null}
+                ref={setLineRef(index)}
                 className={`text-center py-4 transition-all duration-700 ease-out ${
                   isPast ? 'text-blue-200/30' : 'text-white'
                 }`}
