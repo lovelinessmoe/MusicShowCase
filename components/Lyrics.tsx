@@ -34,24 +34,30 @@ export function Lyrics({ lrcLyrics, currentTime }: LyricsProps) {
     const currentLine = currentLineRefs.current.get(currentIndex);
     
     if (container && currentLine && currentIndex >= 0) {
-      // 使用 setTimeout 确保 DOM 已更新
-      setTimeout(() => {
-        const containerRect = container.getBoundingClientRect();
-        const lineRect = currentLine.getBoundingClientRect();
-        
-        // 计算当前行相对于容器的位置
-        const lineRelativeTop = currentLine.offsetTop;
-        const containerHeight = container.clientHeight;
-        const lineHeight = currentLine.clientHeight;
-        
-        // 计算滚动位置，让当前行居中
-        const targetScrollTop = lineRelativeTop - (containerHeight / 2) + (lineHeight / 2);
-        
-        container.scrollTo({
-          top: targetScrollTop,
-          behavior: 'smooth',
-        });
-      }, 50);
+      // 延迟执行确保 DOM 已更新
+      const timer = setTimeout(() => {
+        try {
+          // 获取容器和当前行的尺寸信息
+          const containerHeight = container.clientHeight;
+          const lineOffsetTop = currentLine.offsetTop;
+          const lineHeight = currentLine.clientHeight;
+          
+          // 计算目标滚动位置（让当前行居中）
+          const targetScroll = lineOffsetTop - (containerHeight / 2) + (lineHeight / 2);
+          
+          // 执行滚动
+          container.scrollTo({
+            top: targetScroll,
+            behavior: 'smooth',
+          });
+          
+          console.log('Scrolling to:', { currentIndex, targetScroll, lineOffsetTop, containerHeight });
+        } catch (error) {
+          console.error('Scroll error:', error);
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
   }, [currentIndex]);
 
