@@ -42,10 +42,10 @@ export function MusicPlayer({ track }: MusicPlayerProps) {
   const hasLyrics = !!track.lrcLyrics;
 
   return (
-    <div className={`w-full mx-auto ${hasLyrics ? 'max-w-[1400px]' : 'max-w-2xl'}`}>
+    <div className={`w-full mx-auto ${hasLyrics ? 'max-w-[1600px]' : 'max-w-2xl'}`}>
       <div className={`flex ${hasLyrics ? 'flex-col lg:flex-row' : 'justify-center'} gap-8 items-start`}>
         {/* 播放器主体 */}
-        <div className={`${hasLyrics ? 'w-full lg:w-auto lg:flex-shrink-0' : 'w-full max-w-2xl'} mx-auto lg:mx-0`}>
+        <div className={`${hasLyrics ? 'w-full lg:w-[500px] lg:flex-shrink-0' : 'w-full max-w-2xl'} mx-auto lg:mx-0`}>
           <div className="w-full p-4 sm:p-6 lg:p-8 bg-white/5 backdrop-blur-lg rounded-2xl shadow-2xl max-w-[280px] sm:max-w-[400px] lg:max-w-[500px] border border-white/10 transition-all duration-300 hover:bg-white/10 hover:border-white/20 mx-auto">
             {/* 专辑封面 */}
             <AlbumCover
@@ -100,9 +100,9 @@ export function MusicPlayer({ track }: MusicPlayerProps) {
           </div>
         </div>
 
-        {/* 歌词显示区域 - 在右侧 */}
+        {/* 歌词显示区域 - 在右侧，更宽 */}
         {hasLyrics && (
-          <div className="w-full lg:flex-1 h-[600px] lg:h-[650px] p-6 bg-gradient-to-br from-white/5 via-blue-500/5 to-purple-500/5 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/10 relative overflow-hidden">
+          <div className="w-full lg:flex-1 lg:min-w-[600px] p-8 bg-gradient-to-br from-white/5 via-blue-500/5 to-purple-500/5 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/10 relative overflow-hidden" style={{ height: '650px' }}>
             {/* 背景装饰 */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 opacity-50" />
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
