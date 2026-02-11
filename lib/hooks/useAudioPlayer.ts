@@ -54,21 +54,13 @@ export function useAudioPlayer(audioUrl: string): UseAudioPlayerReturn {
   // 错误状态管理
   const [error, setError] = useState<string | null>(null);
   
-  // 加载状态管理
-  const [isLoading, setIsLoading] = useState(true);
+  // 加载状态管理 - 初始设为 false，因为 preload="metadata" 不会立即加载音频
+  const [isLoading, setIsLoading] = useState(false);
 
   // 添加音频事件监听器（子任务 3.2）
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-
-    // 设置加载超时（10秒）
-    const loadingTimeout = setTimeout(() => {
-      if (isLoading) {
-        setError('加载超时，请检查网络连接或刷新页面');
-        setIsLoading(false);
-      }
-    }, 10000);
 
     // 监听 timeupdate 事件更新播放进度
     const handleTimeUpdate = () => {
@@ -77,10 +69,17 @@ export function useAudioPlayer(audioUrl: string): UseAudioPlayerReturn {
 
     // 监听 loadedmetadata 事件获取音频时长
     const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
-      setError(null); // 清除之前的错误
-      setIsLoading(false); // 元数据加载完成
-      clearTimeout(loadingTimeout);
+      if (audio.duration && !isNaN(audio.duration)) {
+        setDuration(audio.duration);
+      }
+      setError(null);
+    };
+
+    // 监听 durationchange 事件
+    const handleDurationChange = () => {
+      if (audio.duration && !isNaN(audio.duration)) {
+        setDuration(audio.duration);
+      }
     };
 
     // 监听 ended 事件处理播放结束
@@ -96,12 +95,10 @@ export function useAudioPlayer(audioUrl: string): UseAudioPlayerReturn {
       setError('无法加载音频文件，请检查网络连接');
       setIsPlaying(false);
       setIsLoading(false);
-      clearTimeout(loadingTimeout);
     };
 
-    // 监听 waiting 事件处理缓冲
+    // 监听 waiting 事件处理缓冲 - 只在播放时显示
     const handleWaiting = () => {
-      // 只在播放时显示缓冲状态
       if (isPlaying) {
         setIsLoading(true);
       }
@@ -110,13 +107,11 @@ export function useAudioPlayer(audioUrl: string): UseAudioPlayerReturn {
     // 监听 canplay 事件表示可以播放
     const handleCanPlay = () => {
       setIsLoading(false);
-      clearTimeout(loadingTimeout);
     };
 
-    // 监听 canplaythrough 事件表示完全加载（性能优化）
+    // 监听 canplaythrough 事件表示完全加载
     const handleCanPlayThrough = () => {
       setIsLoading(false);
-      clearTimeout(loadingTimeout);
     };
 
     // 监听 playing 事件
@@ -124,27 +119,37 @@ export function useAudioPlayer(audioUrl: string): UseAudioPlayerReturn {
       setIsLoading(false);
     };
 
+    // 监听 loadstart 事件 - 开始加载时
+    const handleLoadStart = () => {
+      if (isPlaying) {
+        setIsLoading(true);
+      }
+    };
+
     // 添加事件监听器
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('durationchange', handleDurationChange);
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('error', handleError);
     audio.addEventListener('waiting', handleWaiting);
     audio.addEventListener('canplay', handleCanPlay);
     audio.addEventListener('canplaythrough', handleCanPlayThrough);
     audio.addEventListener('playing', handlePlaying);
+    audio.addEventListener('loadstart', handleLoadStart);
 
     // 清理函数：移除事件监听器
     return () => {
-      clearTimeout(loadingTimeout);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('durationchange', handleDurationChange);
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
       audio.removeEventListener('waiting', handleWaiting);
       audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('canplaythrough', handleCanPlayThrough);
       audio.removeEventListener('playing', handlePlaying);
+      audio.removeEventListener('loadstart', handleLoadStart);
     };
   }, [isPlaying]);
 
@@ -156,10 +161,20 @@ export function useAudioPlayer(audioUrl: string): UseAudioPlayerReturn {
   const play = () => {
     const audio = audioRef.current;
     if (audio) {
+      // 如果还没有 duration，先加载元数据
+      if (!audio.duration || isNaN(audio.duration)) {
+        audio.load();
+      }
+      
       audio.play()
         .then(() => {
           setIsPlaying(true);
           setError(null);
+          
+          // 如果播放成功但还没有 duration，手动设置
+          if (audio.duration && !isNaN(audio.duration)) {
+            setDuration(audio.duration);
+          }
         })
         .catch((err) => {
           console.error('播放失败:', err);

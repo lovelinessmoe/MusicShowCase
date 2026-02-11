@@ -99,15 +99,18 @@ export function MusicPlayer({ track }: MusicPlayerProps) {
             />
           </div>
 
-          {/* 歌词显示区域 */}
-          <div className="w-full lg:flex-1 lg:min-w-[700px] lg:max-h-[650px] p-8 relative">
-            {/* 背景渐变装饰 - 更柔和 */}
+          {/* 歌词显示区域 - 完全透明 */}
+          <div className="w-full lg:flex-1 lg:min-w-[700px] h-[650px] relative">
+            {/* 只保留背景光效装饰 */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/3 translate-x-1/3 animate-pulse-slow pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 animate-pulse-slow pointer-events-none" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl pointer-events-none" />
             
+            {/* 中心聚光效果 */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-40 bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none blur-sm" />
+            
             {/* 歌词内容 */}
-            <div className="relative z-10 h-full">
+            <div className="relative z-10 h-full p-8">
               <Lyrics lrcLyrics={track.lrcLyrics} currentTime={currentTime} />
             </div>
           </div>

@@ -36,10 +36,18 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function Home() {
+export default function Home({ searchParams }: { searchParams: { track?: string } }) {
   const headersList = headers();
   const host = headersList.get('host') || '';
-  const track = getTrackByDomain(host);
+  
+  // 如果有 track 参数，使用指定的歌曲，否则根据域名判断
+  let track;
+  if (searchParams.track) {
+    const { getTrackById, getAllTracks } = require('@/lib/data/tracks');
+    track = getTrackById(searchParams.track) || getAllTracks()[0];
+  } else {
+    track = getTrackByDomain(host);
+  }
 
   return (
     <>

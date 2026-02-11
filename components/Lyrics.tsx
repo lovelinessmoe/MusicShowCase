@@ -34,8 +34,8 @@ export function Lyrics({ lrcLyrics, currentTime }: LyricsProps) {
     const currentLine = currentLineRefs.current.get(currentIndex);
     
     if (container && currentLine && currentIndex >= 0) {
-      // 延迟执行确保 DOM 已更新
-      const timer = setTimeout(() => {
+      // 使用 requestAnimationFrame 确保在下一帧执行
+      const rafId = requestAnimationFrame(() => {
         try {
           // 获取容器和当前行的尺寸信息
           const containerHeight = container.clientHeight;
@@ -50,14 +50,12 @@ export function Lyrics({ lrcLyrics, currentTime }: LyricsProps) {
             top: targetScroll,
             behavior: 'smooth',
           });
-          
-          console.log('Scrolling to:', { currentIndex, targetScroll, lineOffsetTop, containerHeight });
         } catch (error) {
           console.error('Scroll error:', error);
         }
-      }, 100);
+      });
       
-      return () => clearTimeout(timer);
+      return () => cancelAnimationFrame(rafId);
     }
   }, [currentIndex]);
 
@@ -75,17 +73,16 @@ export function Lyrics({ lrcLyrics, currentTime }: LyricsProps) {
 
   return (
     <div className="relative w-full h-full">
-      {/* 顶部渐变遮罩 */}
-      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#0f0f0f] via-transparent to-transparent pointer-events-none z-10" />
-      
-      {/* 中心高亮区域 */}
-      <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 h-32 bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none z-10 rounded-lg" />
-      
       {/* 歌词滚动容器 */}
       <div 
         ref={lyricsContainerRef}
         className="w-full h-full overflow-y-auto px-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        style={{ 
+          scrollbarWidth: 'none', 
+          msOverflowStyle: 'none',
+          scrollBehavior: 'smooth',
+          WebkitOverflowScrolling: 'touch',
+        }}
       >
         <div className="py-40">
           {lyrics.map((line, index) => {
@@ -116,13 +113,14 @@ export function Lyrics({ lrcLyrics, currentTime }: LyricsProps) {
               <div
                 key={index}
                 ref={setLineRef(index)}
-                className={`text-center py-4 transition-all duration-700 ease-out ${
+                className={`text-center py-4 transition-all duration-500 ease-out ${
                   isPast ? 'text-blue-200/30' : 'text-white'
                 }`}
                 style={{
                   opacity,
                   transform: `scale(${scale})`,
                   filter: blur,
+                  willChange: isCurrent ? 'transform, opacity' : 'auto',
                 }}
               >
                 {/* 英文歌词 */}
@@ -160,9 +158,6 @@ export function Lyrics({ lrcLyrics, currentTime }: LyricsProps) {
           })}
         </div>
       </div>
-      
-      {/* 底部渐变遮罩 */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#0f0f0f] via-transparent to-transparent pointer-events-none z-10" />
     </div>
   );
 }
