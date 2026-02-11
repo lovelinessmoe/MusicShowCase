@@ -62,6 +62,14 @@ export function useAudioPlayer(audioUrl: string): UseAudioPlayerReturn {
     const audio = audioRef.current;
     if (!audio) return;
 
+    // 设置加载超时（10秒）
+    const loadingTimeout = setTimeout(() => {
+      if (isLoading) {
+        setError('加载超时，请检查网络连接或刷新页面');
+        setIsLoading(false);
+      }
+    }, 10000);
+
     // 监听 timeupdate 事件更新播放进度
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
@@ -72,6 +80,7 @@ export function useAudioPlayer(audioUrl: string): UseAudioPlayerReturn {
       setDuration(audio.duration);
       setError(null); // 清除之前的错误
       setIsLoading(false); // 元数据加载完成
+      clearTimeout(loadingTimeout);
     };
 
     // 监听 ended 事件处理播放结束
@@ -87,20 +96,31 @@ export function useAudioPlayer(audioUrl: string): UseAudioPlayerReturn {
       setError('无法加载音频文件，请检查网络连接');
       setIsPlaying(false);
       setIsLoading(false);
+      clearTimeout(loadingTimeout);
     };
 
     // 监听 waiting 事件处理缓冲
     const handleWaiting = () => {
-      setIsLoading(true);
+      // 只在播放时显示缓冲状态
+      if (isPlaying) {
+        setIsLoading(true);
+      }
     };
 
     // 监听 canplay 事件表示可以播放
     const handleCanPlay = () => {
       setIsLoading(false);
+      clearTimeout(loadingTimeout);
     };
 
     // 监听 canplaythrough 事件表示完全加载（性能优化）
     const handleCanPlayThrough = () => {
+      setIsLoading(false);
+      clearTimeout(loadingTimeout);
+    };
+
+    // 监听 playing 事件
+    const handlePlaying = () => {
       setIsLoading(false);
     };
 
@@ -112,9 +132,11 @@ export function useAudioPlayer(audioUrl: string): UseAudioPlayerReturn {
     audio.addEventListener('waiting', handleWaiting);
     audio.addEventListener('canplay', handleCanPlay);
     audio.addEventListener('canplaythrough', handleCanPlayThrough);
+    audio.addEventListener('playing', handlePlaying);
 
     // 清理函数：移除事件监听器
     return () => {
+      clearTimeout(loadingTimeout);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
@@ -122,8 +144,9 @@ export function useAudioPlayer(audioUrl: string): UseAudioPlayerReturn {
       audio.removeEventListener('waiting', handleWaiting);
       audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('canplaythrough', handleCanPlayThrough);
+      audio.removeEventListener('playing', handlePlaying);
     };
-  }, []);
+  }, [isPlaying]);
 
   // 实现播放控制方法（子任务 3.3）
   
