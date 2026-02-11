@@ -73,89 +73,113 @@ export function Lyrics({ lrcLyrics, currentTime }: LyricsProps) {
 
   return (
     <div className="relative w-full h-full">
-      {/* 歌词滚动容器 */}
-      <div 
-        ref={lyricsContainerRef}
-        className="w-full h-full overflow-y-auto px-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-        style={{ 
-          scrollbarWidth: 'none', 
-          msOverflowStyle: 'none',
-          scrollBehavior: 'smooth',
-          WebkitOverflowScrolling: 'touch',
-        }}
-      >
-        <div className="py-40">
-          {lyrics.map((line, index) => {
-            const isCurrent = index === currentIndex;
-            const isPast = index < currentIndex;
-            const distance = Math.abs(index - currentIndex);
+      {/* 移动端：只显示当前歌词 */}
+      <div className="lg:hidden flex items-center justify-center h-full px-4">
+        {currentIndex >= 0 && lyrics[currentIndex] && (
+          <div className="text-center animate-fade-in">
+            {/* 英文歌词 */}
+            <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent leading-relaxed mb-3">
+              {lyrics[currentIndex].text}
+            </div>
             
-            // 计算透明度和缩放
-            let opacity = 0.25;
-            let scale = 0.9;
-            let blur = 'blur(0.5px)';
+            {/* 中文翻译 */}
+            {lyrics[currentIndex].translation && (
+              <div className="text-base sm:text-lg text-blue-100/90 leading-relaxed">
+                {lyrics[currentIndex].translation}
+              </div>
+            )}
             
-            if (isCurrent) {
-              opacity = 1;
-              scale = 1.05;
-              blur = 'blur(0px)';
-            } else if (distance === 1) {
-              opacity = 0.6;
-              scale = 0.95;
-              blur = 'blur(0px)';
-            } else if (distance === 2) {
-              opacity = 0.4;
-              scale = 0.92;
-              blur = 'blur(0px)';
-            }
+            {/* 装饰线 */}
+            <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent mx-auto mt-4 animate-pulse" />
+          </div>
+        )}
+      </div>
 
-            return (
-              <div
-                key={index}
-                ref={setLineRef(index)}
-                className={`text-center py-4 transition-all duration-500 ease-out ${
-                  isPast ? 'text-blue-200/30' : 'text-white'
-                }`}
-                style={{
-                  opacity,
-                  transform: `scale(${scale})`,
-                  filter: blur,
-                  willChange: isCurrent ? 'transform, opacity' : 'auto',
-                }}
-              >
-                {/* 英文歌词 */}
-                <div 
-                  className={`leading-relaxed font-medium tracking-wide ${
-                    isCurrent 
-                      ? 'text-2xl lg:text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent animate-pulse-subtle' 
-                      : 'text-base lg:text-lg'
+      {/* 桌面端：滚动显示所有歌词 */}
+      <div className="hidden lg:block w-full h-full">
+        <div 
+          ref={lyricsContainerRef}
+          className="w-full h-full overflow-y-auto px-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          style={{ 
+            scrollbarWidth: 'none', 
+            msOverflowStyle: 'none',
+            scrollBehavior: 'smooth',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
+          <div className="py-40">
+            {lyrics.map((line, index) => {
+              const isCurrent = index === currentIndex;
+              const isPast = index < currentIndex;
+              const distance = Math.abs(index - currentIndex);
+              
+              // 计算透明度和缩放
+              let opacity = 0.25;
+              let scale = 0.9;
+              let blur = 'blur(0.5px)';
+              
+              if (isCurrent) {
+                opacity = 1;
+                scale = 1.05;
+                blur = 'blur(0px)';
+              } else if (distance === 1) {
+                opacity = 0.6;
+                scale = 0.95;
+                blur = 'blur(0px)';
+              } else if (distance === 2) {
+                opacity = 0.4;
+                scale = 0.92;
+                blur = 'blur(0px)';
+              }
+
+              return (
+                <div
+                  key={index}
+                  ref={setLineRef(index)}
+                  className={`text-center py-4 transition-all duration-500 ease-out ${
+                    isPast ? 'text-blue-200/30' : 'text-white'
                   }`}
+                  style={{
+                    opacity,
+                    transform: `scale(${scale})`,
+                    filter: blur,
+                    willChange: isCurrent ? 'transform, opacity' : 'auto',
+                  }}
                 >
-                  {line.text}
-                </div>
-                
-                {/* 中文翻译 */}
-                {line.translation && (
+                  {/* 英文歌词 */}
                   <div 
-                    className={`mt-2 leading-relaxed ${
+                    className={`leading-relaxed font-medium tracking-wide ${
                       isCurrent 
-                        ? 'text-base lg:text-lg text-blue-100/90' 
-                        : 'text-sm lg:text-base text-white/70'
+                        ? 'text-2xl lg:text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent animate-pulse-subtle' 
+                        : 'text-base lg:text-lg'
                     }`}
                   >
-                    {line.translation}
+                    {line.text}
                   </div>
-                )}
-                
-                {/* 当前行装饰 */}
-                {isCurrent && (
-                  <>
-                    <div className="absolute left-1/2 -translate-x-1/2 w-16 h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent mt-4 animate-pulse" />
-                  </>
-                )}
-              </div>
-            );
-          })}
+                  
+                  {/* 中文翻译 */}
+                  {line.translation && (
+                    <div 
+                      className={`mt-2 leading-relaxed ${
+                        isCurrent 
+                          ? 'text-base lg:text-lg text-blue-100/90' 
+                          : 'text-sm lg:text-base text-white/70'
+                      }`}
+                    >
+                      {line.translation}
+                    </div>
+                  )}
+                  
+                  {/* 当前行装饰 */}
+                  {isCurrent && (
+                    <>
+                      <div className="absolute left-1/2 -translate-x-1/2 w-16 h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent mt-4 animate-pulse" />
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

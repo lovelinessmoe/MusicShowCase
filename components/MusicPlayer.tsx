@@ -44,8 +44,8 @@ export function MusicPlayer({ track }: MusicPlayerProps) {
   return (
     <div className={`w-full mx-auto ${hasLyrics ? 'max-w-[1600px]' : 'max-w-2xl'}`}>
       {hasLyrics ? (
-        // 有歌词时：左右布局在同一个容器内
-        <div className="flex flex-col lg:flex-row gap-8 items-center justify-center">
+        // 有歌词时：桌面端左右布局，移动端上下布局
+        <div className="flex flex-col lg:flex-row gap-8 items-center justify-center lg:items-start h-screen lg:h-auto overflow-hidden lg:overflow-visible">
           <div className="w-full lg:w-[500px] flex-shrink-0 p-4 sm:p-6 lg:p-8 bg-white/5 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/10 transition-all duration-300 hover:bg-white/10 hover:border-white/20">
             {/* 专辑封面 */}
             <AlbumCover
@@ -99,8 +99,8 @@ export function MusicPlayer({ track }: MusicPlayerProps) {
             />
           </div>
 
-          {/* 歌词显示区域 - 完全透明 */}
-          <div className="w-full lg:flex-1 lg:min-w-[700px] h-[650px] relative">
+          {/* 歌词显示区域 - 桌面端滚动，移动端单行 */}
+          <div className="w-full lg:flex-1 lg:min-w-[700px] h-auto lg:h-[650px] relative flex-shrink-0">
             {/* 只保留背景光效装饰 */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/3 translate-x-1/3 animate-pulse-slow pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 animate-pulse-slow pointer-events-none" />
@@ -110,7 +110,7 @@ export function MusicPlayer({ track }: MusicPlayerProps) {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-40 bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none blur-sm" />
             
             {/* 歌词内容 */}
-            <div className="relative z-10 h-full p-8">
+            <div className="relative z-10 h-full p-4 lg:p-8">
               <Lyrics lrcLyrics={track.lrcLyrics} currentTime={currentTime} />
             </div>
           </div>

@@ -67,7 +67,7 @@ export default function Home({ searchParams }: { searchParams: { track?: string 
         type="audio/mpeg"
       />
       
-      <main className="flex min-h-screen items-center justify-center p-4 animate-fade-in">
+      <main className="flex min-h-screen items-center justify-center p-4 animate-fade-in overflow-hidden lg:overflow-visible">
         <div className="w-full max-w-2xl">
           <MusicPlayer track={track} />
         </div>
